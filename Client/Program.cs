@@ -2,6 +2,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using GrainInterfaces;
+using GrainInterfaces.Dtos;
+using GrainInterfaces.Plugins.Filter;
+using GrainInterfaces.Plugins.ManualInput;
+using GrainInterfaces.Plugins.Printer;
 
 IHostBuilder builder = Host.CreateDefaultBuilder(args)
     .UseOrleansClient(client =>
@@ -16,14 +20,19 @@ await host.StartAsync();
 
 IClusterClient client = host.Services.GetRequiredService<IClusterClient>();
 
-IHello friend = client.GetGrain<IHello>(0);
-string response = await friend.SayHello("Hi friend!");
+var scenarioFlowManager = client.GetGrain<IScenarioFlowManager>(0);
 
-Console.WriteLine($"""
-                   {response}
+var pluginsInfo = new List<PluginInfo>
+{
+    new("ManualInput", new ManualInputConfiguration("asghar")),
+    new("Filter", new FilterConfiguration(FilterOperator.Contains, "asd")),
+    new("Printer", new PrinterConfiguration())
+};
+var scenarioDesign = new ScenarioDesignDto(pluginsInfo);
 
-                   Press any key to exit...
-                   """);
+await scenarioFlowManager.RunScenario(scenarioDesign);
+
+Console.WriteLine("Press any key to exit...");
 
 Console.ReadKey();
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Grains;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 IHostBuilder builder = Host.CreateDefaultBuilder(args)
@@ -6,6 +7,8 @@ IHostBuilder builder = Host.CreateDefaultBuilder(args)
     {
         silo.UseLocalhostClustering()
             .ConfigureLogging(logging => logging.AddConsole());
+
+        silo.Services.AddGrainsServices();
     })
     .UseConsoleLifetime();
 
